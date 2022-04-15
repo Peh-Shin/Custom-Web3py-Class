@@ -15,6 +15,6 @@ def initialise(cid):
     return contract
 
 def get_creation_txn(addr):
-    url = f"https://api.etherscan.io/api?module=account&action=txlist&address={addr}&startblock=0&endblock=99999999&sort=asc&apikey=3KD7GRGAU3UHUWF2D1KA7WZAUUSRMXKU7X"
+    url = f"https://api.etherscan.io/api?module=account&action=txlist&address={addr}&startblock=0&endblock=99999999&sort=asc&apikey={ETHERSCAN_API_KEY}"
     response = requests.request("GET", url)
     return response.json()["result"]
