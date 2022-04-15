@@ -7,13 +7,8 @@
 #  ...
 # }
 import requests
-import pandas as pd
-import time 
-from web3 import Web3
-from config import WEBSOCKET_URL, ETHERSCAN_API_KEY, BITQUERY_API_KEY
-
-moralis_node = Web3.WebsocketProvider(WEBSOCKET_URL) # moralis API
-moralis = Web3(moralis_node)
+from config import BITQUERY_API_KEY
+from utils import getABI, initialise, get_creation_txn, moralis
 
 chain_mapping = {
     "ETH": "ethereum",
@@ -22,10 +17,6 @@ chain_mapping = {
     "FTM": "fantom",
     "BSC_FULL": "bsc"
 }
-def get_creation_txn(addr):
-    url = f"https://api.etherscan.io/api?module=account&action=txlist&address={addr}&startblock=0&endblock=99999999&sort=asc&apikey={ETHERSCAN_API_KEY}" # Etherscan API
-    response = requests.request("GET", url)
-    return response.json()["result"]
 
 def run_query(query):  # A simple function to use requests.post to make the API call.
     headers = {'X-API-KEY': BITQUERY_API_KEY} # Bitquery API
@@ -72,4 +63,4 @@ def event_listener(chain, cid, event_name):
             implementation_contracts.update({int(get_creation_txn(impl_cid)[0]['blockNumber']):impl_cid})
     return implementation_contracts
 
-print(event_listener("BSC", "0xee7bc7727436d839634845766f567fa354ba8c56", "Upgraded"))
+print(event_listener("ETH", "", "Upgraded"))
