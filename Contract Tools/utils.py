@@ -18,6 +18,22 @@ from config import BLOCK_EXPLORER
 # Without any brackets, it means you are either 1. just accessing the class without init anything,
 # or 2. there's no init for the class, hence you can create an object of the class directly
 class W3_OBJECT(Web3):
+    @staticmethod
+    def function_call(contract, fn_obj):
+        def execute_function_call(*args):
+            # Can I simplify the way of applying checkSum, rather than creating a new list?
+            arguments = []
+            cid = contract  # Relook at how to change this, and also why can't pass contract object to eval string
+            for arg in args:
+                try:
+                    arguments.append(super().toChecksumAddress(arg))
+                except:
+                    arguments.append(arg)
+                    continue
+            return eval(f"cid.functions.{fn_obj}{(*arguments,)}.call()")
+
+        return execute_function_call
+
     def __init__(self, chain):
         self.chain = chain
         super().__init__(
@@ -29,32 +45,25 @@ class W3_OBJECT(Web3):
         self.contract_abi = requests.request("GET", url).json()["result"]
         return self.contract_abi
 
-    @staticmethod
-    def function_call(contract, fn_obj):
-        def pass_input(*args):
-            cid = contract  # Relook at how to change this, and also why can't pass contract object to eval string
-            return eval(f"cid.functions.{fn_obj}{args}.call()")
-
-        return pass_input
-
     def contract(self, address):
         contract = self.eth.contract(address=address, abi=self.getABI(address))
         for function in contract.functions._functions:
             setattr(
-                self,
+                contract,
                 function["name"],
                 self.function_call(  # Why is it still using "self" to call staticmethod?
                     contract, function["name"]
                 ),  # Value stored into attribute is the function["name"] object itself that is an input to another_function that allows for user input to be passed in to the function["name"] object
             )
-        return self
+        return contract
 
-
+# Regex search functions by name
+# Match function by input data type
+# 
 
 ETH = W3_OBJECT("ETH")
 lp_farm = ETH.contract("0xc2EdaD668740f1aA35E4D8f227fB8E17dcA888Cd")
-print(lp_farm.pendingSushi(347, "econbeard.eth"))
-
+print(lp_farm.pendingSushi(347, "0x2FB7E2a682dFd678F31ef75d8Ad455d86836bfbA"))
 # def getABI(cid, chain):
 #     moralis = Web3(
 #         Web3.WebsocketProvider(BLOCK_EXPLORER[chain]["websocket"])
